@@ -1,0 +1,184 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container my-4">
+    <!-- Toolbar (Hidden during print) -->
+    <div class="d-flex justify-content-between align-items-center mb-3 d-print-none">
+        <form method="GET" class="d-flex align-items-center gap-2">
+            <label for="term" class="fw-bold mb-0">Term:</label>
+            <select name="term" id="term" class="form-select form-select-sm" onchange="this.form.submit()">
+                {% for t in terms %}
+                    <option value="{{ t.id }}" {% if selected_term and t.id == selected_term.id %}selected{% endif %}>
+                        {{ t.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </form>
+
+        <div>
+            <button onclick="window.print()" class="btn btn-primary btn-sm me-2">
+                <i class="fa-solid fa-print me-1"></i> Print Report Card
+            </button>
+            <a href="{% url 'student_detail' student.pk %}" class="btn btn-outline-secondary btn-sm">Back</a>
+        </div>
+    </div>
+
+    <!-- REPORT CARD SHEET -->
+    <div class="report-card-sheet bg-white p-4 border shadow-sm" id="reportCard">
+        
+        <!-- TOP HEADER BLOCK -->
+        <div class="row align-items-center border mb-3 text-center g-0">
+            <div class="col-2 border-end p-2 d-flex align-items-center justify-content-center" style="min-height: 90px;">
+                <img src="{% static 'images/logo.png' %}" alt="Logo" style="max-height: 75px; max-width: 100%; object-fit: contain;">
+            </div>
+            <div class="col-8 p-2">
+                <h3 class="fw-bold text-uppercase mb-0" style="color: #1b4066;">Grace Academy</h3>
+                <h5 class="fw-bold text-uppercase text-secondary mb-1" style="letter-spacing: 1px;">Student Progress Report Card</h5>
+                <small class="text-muted">School Address • Telephone • Email</small>
+            </div>
+            <div class="col-2 border-start p-2 d-flex align-items-center justify-content-center bg-light fw-bold text-uppercase text-secondary" style="font-size: 0.85rem;">
+                Report<br>Card
+            </div>
+        </div>
+
+        <!-- STUDENT METADATA GRID -->
+        <table class="table table-bordered align-middle mb-3 style-info-table" style="font-size: 0.85rem;">
+            <tbody>
+                <tr>
+                    <td class="bg-light fw-bold text-secondary" style="width: 12%;">Student Name:</td>
+                    <td style="width: 38%;">{{ student.first_name }} {{ student.last_name }}</td>
+                    <td class="bg-light fw-bold text-secondary" style="width: 12%;">Student No.:</td>
+                    <td style="width: 13%;">{{ student.admission_number }}</td>
+                    <td class="bg-light fw-bold text-secondary" style="width: 12%;">Grade/Class:</td>
+                    <td style="width: 13%;">{{ student.classroom.name|default:"-" }}</td>
+                </tr>
+                <tr>
+                    <td class="bg-light fw-bold text-secondary">Term:</td>
+                    <td>{{ selected_term.name|default:"-" }}</td>
+                    <td class="bg-light fw-bold text-secondary">Term Ending:</td>
+                    <td>{{ selected_term.end_date|date:"d/m/Y"|default:"__/__/____" }}</td>
+                    <td class="bg-light fw-bold text-secondary">Next Term:</td>
+                    <td>{{ selected_term.next_term_start|date:"d/m/Y"|default:"__/__/____" }}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- ACADEMIC PERFORMANCE TABLE -->
+        <h6 class="fw-bold text-uppercase mb-2" style="color: #1b4066; letter-spacing: 0.5px;">Academic Performance</h6>
+        <table class="table table-bordered align-middle mb-4 text-center" style="font-size: 0.85rem;">
+            <thead>
+                <tr style="background-color: #1b4066; color: #ffffff;">
+                    <th class="text-start" style="width: 30%;">SUBJECT</th>
+                    <th style="width: 10%;">TEST 1</th>
+                    <th style="width: 10%;">MID-TERM</th>
+                    <th style="width: 10%;">END-TERM</th>
+                    <th style="width: 12%;">% AVERAGE</th>
+                    <th style="width: 8%;">GRADE</th>
+                    <th style="width: 20%;">REMARKS</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for mark in marks %}
+                <tr>
+                    <td class="text-start fw-bold text-uppercase">{{ mark.subject.name }}</td>
+                    <td>{{ mark.test1|default:"-" }}</td>
+                    <td>{{ mark.test2|default:"-" }}</td>
+                    <td>{{ mark.test3|default:"-" }}</td>
+                    <td class="fw-bold">{{ mark.average|default:"-" }}</td>
+                    <td class="fw-bold text-primary">{{ mark.calculated_grade }}</td>
+                    <td class="text-start text-capitalize">{{ mark.calculated_remark }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-muted py-3">No academic performance records found for this term.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- BOTTOM GRID (BEHAVIOR & REMARKS) -->
+        <div class="row g-3">
+            <!-- Left Column: Personal Behaviour & Character -->
+            <div class="col-5">
+                <table class="table table-bordered table-sm align-middle mb-0" style="font-size: 0.8rem;">
+                    <thead>
+                        <tr class="bg-light">
+                            <th colspan="2" class="text-center text-uppercase fw-bold text-secondary">Personal Behaviour & Character</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td class="fw-semibold">Obedience:</td><td>{{ behavior.obedience_discipline|default:"____________________" }}</td></tr>
+                        <tr><td class="fw-semibold">Self Control:</td><td>{{ behavior.self_control|default:"____________________" }}</td></tr>
+                        <tr><td class="fw-semibold">Sports:</td><td>{{ behavior.sports|default:"____________________" }}</td></tr>
+                        <tr><td class="fw-semibold">Honesty:</td><td>{{ behavior.courtesy_respect|default:"____________________" }}</td></tr>
+                        <tr><td class="fw-semibold">Homework:</td><td>{{ behavior.homework|default:"____________________" }}</td></tr>
+                        <tr><td class="fw-semibold">Cheerfulness:</td><td>{{ behavior.cheerfulness|default:"____________________" }}</td></tr>
+                        <tr><td class="fw-semibold">Leadership:</td><td>{{ behavior.leadership_responsibility|default:"____________________" }}</td></tr>
+                        <tr><td class="fw-semibold">Helpfulness:</td><td>{{ behavior.relationship_with_others|default:"____________________" }}</td></tr>
+                        <tr><td class="fw-semibold">Neatness:</td><td>{{ behavior.neatness_cleanliness|default:"____________________" }}</td></tr>
+                        <tr><td class="fw-semibold">Responsibility:</td><td>{{ behavior.responsibility|default:"____________________" }}</td></tr>
+                        <tr><td class="fw-semibold">Stewardship:</td><td>{{ behavior.stewardship|default:"____________________" }}</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Right Column: Summary, Remarks & Signatures -->
+            <div class="col-7 d-flex flex-column justify-content-between" style="font-size: 0.8rem;">
+                <div class="border p-2 mb-2 bg-light">
+                    <div class="fw-bold border-bottom pb-1 mb-2 text-uppercase text-secondary">Summary & Remarks</div>
+                    <p class="mb-2"><strong>OVERALL SCORE:</strong> <span class="badge bg-primary fs-6 ms-1">{{ overall_average }}%</span></p>
+                    <p class="mb-2"><strong>Teacher's Remarks:</strong> {{ behavior.class_teacher_remark|default:"____________________________________________" }}</p>
+                    <p class="mb-2"><strong>Principal's Remarks:</strong> {{ behavior.head_teacher_remark|default:"____________________________________________" }}</p>
+                    <p class="mb-0"><strong>Parent's Remarks:</strong> ____________________________________________</p>
+                </div>
+
+                <!-- Signatures -->
+                <div class="border p-2 mb-2">
+                    <div class="row text-center pt-2">
+                        <div class="col-4">
+                            <div class="border-top pt-1">Teacher Signature</div>
+                        </div>
+                        <div class="col-4">
+                            <div class="border-top pt-1">Principal</div>
+                        </div>
+                        <div class="col-4">
+                            <div class="border-top pt-1">Parent / Date</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Grading Scale Footer Key -->
+                <div class="border p-2 bg-light text-center text-muted" style="font-size: 0.72rem; line-height: 1.3;">
+                    <strong>GRADING:</strong> 95–100 Excellent(1) • 90–94 Very Good(2) • 80–89 Good(3) • 70–79 Pass(4) • 60–69 Fair(5) • 50–59 Below Avg.(6) • 40–49 Satisfactory(7) • 0–39 Unsatisfactory(8)
+                </div>
+            </div>
+        </div>
+
+        <!-- FOOTER MOTTO -->
+        <div class="text-center pt-3 mt-3 border-top fw-semibold text-secondary" style="font-size: 0.8rem;">
+            SCHOOL MOTTO: "__________________________________________________"
+        </div>
+    </div>
+</div>
+
+<style>
+.style-info-table td {
+    padding: 0.4rem 0.5rem;
+}
+
+@media print {
+    body {
+        background-color: #ffffff !important;
+    }
+    nav, footer, .d-print-none, header {
+        display: none !important;
+    }
+    .report-card-sheet {
+        box-shadow: none !important;
+        border: none !important;
+        padding: 0 !important;
+    }
+}
+</style>
+{% endblock %}

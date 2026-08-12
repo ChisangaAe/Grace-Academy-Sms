@@ -1,0 +1,72 @@
+Mark Class Attendance
+    
+
+
+
+
+    Mark Daily Attendance
+
+    {% if success %}
+        Attendance saved successfully!
+    {% endif %}
+
+    
+    
+        
+            Select Class:
+            
+                -- Choose Class --
+                {% for c in classes %}
+                    
+                        {{ c.name }}
+                    
+                {% endfor %}
+            
+        
+        
+            Date:
+            
+        
+        Load Class
+    
+
+    {% if selected_class %}
+        
+        
+            {% csrf_token %}
+            
+            
+
+            Students in {{ selected_class.name }}
+
+            {% if student_data %}
+                
+                        {% for item in student_data %}
+                        
+                        {% endfor %}
+                    
+                    
+                        
+                            Admission #
+                            Student Name
+                            Status
+                        
+                    
+                    
+                            {{ item.student.admission_number }}
+                            {{ item.student.user.get_full_name|default:item.student.user.username }}
+                            
+                                 Present
+                                 Absent
+                                 Late
+                                 Excused
+                            
+                        
+                
+                
+                Save Attendance
+            {% else %}
+                No students assigned to this class yet.
+            {% endif %}
+        
+    {% endif %}

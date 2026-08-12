@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Grace Academy School</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-navy: #0B1B68;
+            --accent-blue: #2563EB;
+            --bg-light: #F8FAFC;
+        }
+        body {
+            background-color: var(--bg-light);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .navbar-custom {
+            background-color: var(--primary-navy);
+        }
+        .stat-card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            transition: transform 0.2s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-2px);
+        }
+        .icon-box {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+        .bg-navy-light { background-color: #EEF2FF; color: var(--primary-navy); }
+        .bg-green-light { background-color: #F0FDF4; color: #166534; }
+        .bg-purple-light { background-color: #FAF5FF; color: #6B21A8; }
+        .bg-orange-light { background-color: #FFF7ED; color: #C2410C; }
+    </style>
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom px-4 py-3 shadow-sm">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold fs-4" href="{% url 'dashboard' %}">
+                <i class="fa-solid fa-graduation-cap me-2"></i>Grace Academy School
+            </a>
+            <div class="d-flex align-items-center gap-3 ms-auto">
+                <span class="text-white-50 small">
+                    Logged in as: <strong class="text-white">{{ user.get_full_name|default:user.username }}</strong> 
+                    <span class="badge bg-light text-dark ms-1">{{ user.get_role_display }}</span>
+                </span>
+                <a href="{% url 'logout' %}" class="btn btn-outline-light btn-sm rounded-pill px-3">
+                    <i class="fa-solid fa-right-from-bracket me-1"></i> Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- CONTENT -->
+    <div class="container py-4">
+
+        <!-- MESSAGES -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- HEADER -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold text-dark m-0">System Overview Dashboard</h2>
+                <p class="text-muted small">Welcome back to Grace Academy Management System</p>
+            </div>
+        </div>
+
+        <!-- STATS CARDS -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="card stat-card p-3">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <span class="text-muted small fw-semibold">TOTAL STUDENTS</span>
+                            <h3 class="fw-bold m-0 mt-1">{{ total_students }}</h3>
+                        </div>
+                        <div class="icon-box bg-navy-light">
+                            <i class="fa-solid fa-user-graduate"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card p-3">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <span class="text-muted small fw-semibold">CLASSROOMS</span>
+                            <h3 class="fw-bold m-0 mt-1">{{ total_classrooms }}</h3>
+                        </div>
+                        <div class="icon-box bg-green-light">
+                            <i class="fa-solid fa-school"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card p-3">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <span class="text-muted small fw-semibold">SUBJECTS</span>
+                            <h3 class="fw-bold m-0 mt-1">{{ total_subjects }}</h3>
+                        </div>
+                        <div class="icon-box bg-purple-light">
+                            <i class="fa-solid fa-book-open"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card p-3">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <span class="text-muted small fw-semibold">ACTIVE TEACHERS</span>
+                            <h3 class="fw-bold m-0 mt-1">{{ total_teachers }}</h3>
+                        </div>
+                        <div class="icon-box bg-orange-light">
+                            <i class="fa-solid fa-chalkboard-user"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PENDING TEACHER APPROVALS (Visible to Super Admins & Admins) -->
+        {% if user.is_admin_user %}
+        <div class="card border-0 shadow-sm rounded-3 mb-4">
+            <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold m-0 text-navy">
+                    <i class="fa-solid fa-user-clock text-warning me-2"></i>Pending Teacher Approvals
+                </h5>
+                <span class="badge bg-warning text-dark">{{ pending_approvals|length }} Pending</span>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-3">Name</th>
+                                <th>Username</th>
+                                <th>Section</th>
+                                <th>Assigned Class / Subjects</th>
+                                <th class="text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for teacher in pending_approvals %}
+                            <tr>
+                                <td class="ps-3 fw-semibold">
+                                    {{ teacher.get_full_name|default:teacher.username }}
+                                </td>
+                                <td>{{ teacher.username }}</td>
+                                <td>
+                                    <span class="badge bg-secondary">{{ teacher.get_section_display|default:"Not Assigned" }}</span>
+                                </td>
+                                <td>
+                                    {% if teacher.primary_class %}
+                                        <span class="badge bg-info text-dark">{{ teacher.primary_class.name }}</span>
+                                    {% elif teacher.secondary_subjects.all %}
+                                        {% for s in teacher.secondary_subjects.all %}
+                                            <span class="badge bg-primary">{{ s.name }}</span>
+                                        {% endfor %}
+                                    {% else %}
+                                        <span class="text-muted small">None</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    <a href="{% url 'approve_user' teacher.pk %}" class="btn btn-sm btn-success px-3 me-1">
+                                        <i class="fa-solid fa-check me-1"></i> Approve
+                                    </a>
+                                    <a href="{% url 'reject_user' teacher.pk %}" class="btn btn-sm btn-outline-danger px-2" onclick="return confirm('Reject and remove this registration?');">
+                                        <i class="fa-solid fa-xmark"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center text-muted py-4">
+                                    <i class="fa-solid fa-circle-check text-success fs-4 d-block mb-2"></i>
+                                    No pending account approvals.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- QUICK NAVIGATION LINKS -->
+        <div class="row g-3">
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100 p-3">
+                    <h5 class="fw-bold"><i class="fa-solid fa-users text-primary me-2"></i>Students</h5>
+                    <p class="text-muted small">Manage student profiles, view report cards, and update personal records.</p>
+                    <a href="{% url 'student_list' %}" class="btn btn-outline-primary btn-sm mt-auto">Go to Students</a>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100 p-3">
+                    <h5 class="fw-bold"><i class="fa-solid fa-user-shield text-dark me-2"></i>Admin Management</h5>
+                    <p class="text-muted small">Access full system settings, roles, and model configurations via Django Admin.</p>
+                    <a href="/admin/" class="btn btn-outline-dark btn-sm mt-auto" target="_blank">Open Admin Portal</a>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100 p-3">
+                    <h5 class="fw-bold"><i class="fa-solid fa-file-pdf text-danger me-2"></i>Report Cards</h5>
+                    <p class="text-muted small">Generate and print official terminal report cards with customized grading formats.</p>
+                    <a href="{% url 'student_list' %}" class="btn btn-outline-danger btn-sm mt-auto">Generate PDF Reports</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

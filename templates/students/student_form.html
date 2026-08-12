@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title|default:"Register Student" }} - Grace Academy</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-dark bg-dark px-4 py-3 mb-4">
+        <a class="navbar-brand fw-bold" href="{% url 'student_list' %}">
+            <i class="fa-solid fa-graduation-cap me-2"></i>Grace Academy
+        </a>
+        <a href="{% url 'student_list' %}" class="btn btn-outline-light btn-sm">
+            <i class="fa-solid fa-arrow-left me-1"></i> Back to Student List
+        </a>
+    </nav>
+
+    <div class="container col-lg-9">
+        <div class="card border-0 shadow-sm p-4 mb-5">
+            <h4 class="fw-bold mb-4 text-primary">
+                <i class="fa-solid fa-user-plus me-2"></i>{{ title|default:"Register New Student" }}
+            </h4>
+<form method="post" enctype="multipart/form-data">  <!-- MUST include enctype -->
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Save</button>
+</form>
+            {% if form.errors %}
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <strong><i class="fa-solid fa-triangle-exclamation me-2"></i>Please fix the following errors:</strong>
+                <ul class="mb-0 mt-2">
+                    {% for field, errors in form.errors.items %}
+                        {% for error in errors %}
+                            <li><strong>{{ field|title }}:</strong> {{ error }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                </ul>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endif %}
+
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <!-- Section 1: Basic Information -->
+                <h6 class="fw-bold text-secondary mb-3 border-bottom pb-2">Basic Information</h6>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <label class="form-label small fw-semibold">Admission Number</label>
+                        {{ form.admission_number }}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-semibold">First Name</label>
+                        {{ form.first_name }}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-semibold">Last Name</label>
+                        {{ form.last_name }}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-semibold">Gender</label>
+                        {{ form.gender }}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-semibold">Date of Birth</label>
+                        {{ form.date_of_birth }}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-semibold">Section</label>
+                        {{ form.section }}
+                    </div>
+                </div>
+
+                <!-- Section 2: Academic & Guardian Details -->
+                <h6 class="fw-bold text-secondary mb-3 border-bottom pb-2">Academic & Guardian Information</h6>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <label class="form-label small fw-semibold">Assigned Classroom</label>
+                        {{ form.classroom }}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-semibold">Guardian Name</label>
+                        {{ form.guardian_name }}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-semibold">Guardian Phone Number</label>
+                        {{ form.guardian_phone }}
+                    </div>
+                </div>
+
+                <!-- Section 3: Passport Photo -->
+                <h6 class="fw-bold text-secondary mb-3 border-bottom pb-2">Student Photo</h6>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-12">
+                        <label class="form-label small fw-semibold">Passport Photo Upload</label>
+                        {{ form.photo }}
+                        <div class="form-text text-muted">Upload a clear passport-style photo (JPEG or PNG format).</div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+                    <a href="{% url 'student_list' %}" class="btn btn-outline-secondary px-4">Cancel</a>
+                    <button type="submit" class="btn btn-primary px-4">
+                        <i class="fa-solid fa-floppy-disk me-1"></i> Register Student
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>s

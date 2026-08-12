@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete Student | School System{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow-sm border-danger">
+            <div class="card-header bg-danger text-white">
+                <h4 class="mb-0">Delete Student Confirmation</h4>
+            </div>
+            <div class="card-body p-4 text-center">
+                <p class="fs-5">Are you sure you want to delete <strong>{{ student.first_name }} {{ student.last_name }}</strong> ({{ student.admission_number }})?</p>
+                <p class="text-muted">This action cannot be undone.</p>
+                <form method="post" class="mt-4">
+                    {% csrf_token %}
+                    <a href="{% url 'student_list' %}" class="btn btn-secondary me-2">Cancel</a>
+                    <button type="submit" class="btn btn-danger">Confirm Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

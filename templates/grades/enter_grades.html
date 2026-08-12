@@ -1,0 +1,50 @@
+Enter Exam Scores
+    
+
+
+
+    Post Exam Grades
+    {% if saved %}Grades saved successfully!{% endif %}
+
+    
+        
+            -- Select Class --
+            {% for c in classes %}{{ c.name }}{% endfor %}
+        
+        
+            -- Select Subject --
+            {% for s in subjects %}{{ s.name }}{% endfor %}
+        
+        
+            -- Select Exam --
+            {% for e in exams %}{{ e.name }}{% endfor %}
+        
+        Load Roster
+    
+
+    {% if student_data %}
+    
+        {% csrf_token %}
+        
+        
+        
+        Scores for {{ selected_subject.name }} ({{ selected_exam.name }})
+        
+                {% for item in student_data %}
+                
+                {% endfor %}
+            
+            
+                Admission #Student NameScore (0-100)Remarks
+            
+            
+                    {{ item.student.admission_number }}
+                    {{ item.student.user.get_full_name|default:item.student.user.username }}
+                    
+                    
+                
+        
+        
+        Save Marks
+    
+    {% endif %}

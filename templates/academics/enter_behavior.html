@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+
+{% block title %}Personal Behaviour & Character Assessment{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-primary text-white fw-bold">
+        <i class="fa-solid fa-user-check me-2"></i> Personal Behaviour & Character Assessment (Class Teacher Portal)
+    </div>
+    <div class="card-body">
+        <form method="GET" class="row g-3 align-items-end mb-4">
+            <div class="col-md-5">
+                <label class="form-label fw-bold">Classroom</label>
+                <select name="classroom" class="form-select" required>
+                    <option value="">-- Select Class --</option>
+                    {% for c in classrooms %}
+                        <option value="{{ c.id }}" {% if c.id == selected_classroom_id %}selected{% endif %}>
+                            {{ c.name }} {% if c.class_teacher %}(Teacher: {{ c.class_teacher.get_full_name|default:c.class_teacher.username }}){% endif %}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-5">
+                <label class="form-label fw-bold">Academic Term</label>
+                <select name="term" class="form-select" required>
+                    <option value="">-- Select Term --</option>
+                    {% for t in terms %}
+                        <option value="{{ t.id }}" {% if t.id == selected_term_id %}selected{% endif %}>{{ t.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">Load Class</button>
+            </div>
+        </form>
+
+        {% if student_evaluations and is_class_teacher %}
+        <form method="POST">
+            {% csrf_token %}
+            {% for item in student_evaluations %}
+            <div class="card border mb-3">
+                <div class="card-header bg-light fw-bold">
+                    {{ forloop.counter }}. {{ item.student.get_full_name }} (ID: {{ item.student.id }})
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold">Punctuality</label>
+                            <select name="punctuality_{{ item.student.id }}" class="form-select form-select-sm">
+                                <option value="EXCELLENT" {% if item.eval.punctuality == 'EXCELLENT' %}selected{% endif %}>A - Excellent</option>
+                                <option value="VERY_GOOD" {% if item.eval.punctuality == 'VERY_GOOD' %}selected{% endif %}>B - Very Good</option>
+                                <option value="GOOD" {% if item.eval.punctuality == 'GOOD' or not item.eval %}selected{% endif %}>C - Good</option>
+                                <option value="SATISFACTORY" {% if item.eval.punctuality == 'SATISFACTORY' %}selected{% endif %}>D - Satisfactory</option>
+                                <option value="NEEDS_IMPROVEMENT" {% if item.eval.punctuality == 'NEEDS_IMPROVEMENT' %}selected{% endif %}>E - Needs Improvement</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold">Neatness & Cleanliness</label>
+                            <select name="cleanliness_{{ item.student.id }}" class="form-select form-select-sm">
+                                <option value="EXCELLENT" {% if item.eval.neatness_cleanliness == 'EXCELLENT' %}selected{% endif %}>A - Excellent</option>
+                                <option value="VERY_GOOD" {% if item.eval.neatness_cleanliness == 'VERY_GOOD' %}selected{% endif %}>B - Very Good</option>
+                                <option value="GOOD" {% if item.eval.neatness_cleanliness == 'GOOD' or not item.eval %}selected{% endif %}>C - Good</option>
+                                <option value="SATISFACTORY" {% if item.eval.neatness_cleanliness == 'SATISFACTORY' %}selected{% endif %}>D - Satisfactory</option>
+                                <option value="NEEDS_IMPROVEMENT" {% if item.eval.neatness_cleanliness == 'NEEDS_IMPROVEMENT' %}selected{% endif %}>E - Needs Improvement</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold">Courtesy & Respect</label>
+                            <select name="courtesy_{{ item.student.id }}" class="form-select form-select-sm">
+                                <option value="EXCELLENT" {% if item.eval.courtesy_respect == 'EXCELLENT' %}selected{% endif %}>A - Excellent</option>
+                                <option value="VERY_GOOD" {% if item.eval.courtesy_respect == 'VERY_GOOD' %}selected{% endif %}>B - Very Good</option>
+                                <option value="GOOD" {% if item.eval.courtesy_respect == 'GOOD' or not item.eval %}selected{% endif %}>C - Good</option>
+                                <option value="SATISFACTORY" {% if item.eval.courtesy_respect == 'SATISFACTORY' %}selected{% endif %}>D - Satisfactory</option>
+                                <option value="NEEDS_IMPROVEMENT" {% if item.eval.courtesy_respect == 'NEEDS_IMPROVEMENT' %}selected{% endif %}>E - Needs Improvement</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold">Obedience & Discipline</label>
+                            <select name="obedience_{{ item.student.id }}" class="form-select form-select-sm">
+                                <option value="EXCELLENT" {% if item.eval.obedience_discipline == 'EXCELLENT' %}selected{% endif %}>A - Excellent</option>
+                                <option value="VERY_GOOD" {% if item.eval.obedience_discipline == 'VERY_GOOD' %}selected{% endif %}>B - Very Good</option>
+                                <option value="GOOD" {% if item.eval.obedience_discipline == 'GOOD' or not item.eval %}selected{% endif %}>C - Good</option>
+                                <option value="SATISFACTORY" {% if item.eval.obedience_discipline == 'SATISFACTORY' %}selected{% endif %}>D - Satisfactory</option>
+                                <option value="NEEDS_IMPROVEMENT" {% if item.eval.obedience_discipline == 'NEEDS_IMPROVEMENT' %}selected{% endif %}>E - Needs Improvement</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold">Relationship with Peers</label>
+                            <select name="relationship_{{ item.student.id }}" class="form-select form-select-sm">
+                                <option value="EXCELLENT" {% if item.eval.relationship_with_others == 'EXCELLENT' %}selected{% endif %}>A - Excellent</option>
+                                <option value="VERY_GOOD" {% if item.eval.relationship_with_others == 'VERY_GOOD' %}selected{% endif %}>B - Very Good</option>
+                                <option value="GOOD" {% if item.eval.relationship_with_others == 'GOOD' or not item.eval %}selected{% endif %}>C - Good</option>
+                                <option value="SATISFACTORY" {% if item.eval.relationship_with_others == 'SATISFACTORY' %}selected{% endif %}>D - Satisfactory</option>
+                                <option value="NEEDS_IMPROVEMENT" {% if item.eval.relationship_with_others == 'NEEDS_IMPROVEMENT' %}selected{% endif %}>E - Needs Improvement</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold">Leadership & Responsibility</label>
+                            <select name="leadership_{{ item.student.id }}" class="form-select form-select-sm">
+                                <option value="EXCELLENT" {% if item.eval.leadership_responsibility == 'EXCELLENT' %}selected{% endif %}>A - Excellent</option>
+                                <option value="VERY_GOOD" {% if item.eval.leadership_responsibility == 'VERY_GOOD' %}selected{% endif %}>B - Very Good</option>
+                                <option value="GOOD" {% if item.eval.leadership_responsibility == 'GOOD' or not item.eval %}selected{% endif %}>C - Good</option>
+                                <option value="SATISFACTORY" {% if item.eval.leadership_responsibility == 'SATISFACTORY' %}selected{% endif %}>D - Satisfactory</option>
+                                <option value="NEEDS_IMPROVEMENT" {% if item.eval.leadership_responsibility == 'NEEDS_IMPROVEMENT' %}selected{% endif %}>E - Needs Improvement</option>
+                            </select>
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label small fw-bold">Class Teacher's General Remarks</label>
+                            <textarea name="remark_{{ item.student.id }}" class="form-control" rows="2" placeholder="Write overall conduct and character comments...">{{ item.eval.class_teacher_remark|default:'' }}</textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            <button type="submit" class="btn btn-success btn-lg mt-2 float-end">
+                <i class="fa-solid fa-floppy-disk me-1"></i> Save All Behavioral Evaluations
+            </button>
+        </form>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

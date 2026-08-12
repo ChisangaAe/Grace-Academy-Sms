@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+
+{% block title %}Grades | School System{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Grades & Assessments</h2>
+    <a href="{% url 'add_grade' %}" class="btn btn-primary">+ Add New Grade</a>
+</div>
+
+<!-- SEARCH & FILTER BAR -->
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-2 align-items-center">
+            <div class="col-md-4">
+                <input type="text" name="q" class="form-control" placeholder="Search student name or admission..." value="{{ query }}">
+            </div>
+            <div class="col-md-3">
+                <select name="subject" class="form-select">
+                    <option value="">All Subjects</option>
+                    {% for subj in subjects %}
+                        <option value="{{ subj.id }}" {% if selected_subject == subj.id|stringformat:"s" %}selected{% endif %}>
+                            {{ subj.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select name="assessment_type" class="form-select">
+                    <option value="">All Assessment Types</option>
+                    {% for code, label in assessment_types %}
+                        <option value="{{ code }}" {% if selected_type == code %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2 d-flex gap-2">
+                <button type="submit" class="btn btn-primary w-100">Search</button>
+                {% if query or selected_subject or selected_type %}
+                    <a href="{% url 'grade_list' %}" class="btn btn-outline-secondary">Reset</a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- GRADES TABLE -->
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        <table class="table table-striped table-hover mb-0">
+            <thead class="table-dark">
+                <tr>
+                    <th>Student</th>
+                    <th>Subject</th>
+                    <th>Assessment</th>
+                    <th>Score</th>
+                    <th>Percentage</th>
+                    <th>Grade</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for grade in grades %}
+                <tr>
+                    <td>{{ grade.student.first_name }} {{ grade.student.last_name }}</td>
+                    <td>{{ grade.subject.name }}</td>
+                    <td>{{ grade.get_assessment_type_display }}</td>
+                    <td>{{ grade.score }} / {{ grade.max_score }}</td>
+                    <td><strong>{{ grade.percentage }}%</strong></td>
+                    <td>
+                        {% if grade.letter_grade == 'A' %}
+                            <span class="badge bg-success">A</span>
+                        {% elif grade.letter_grade == 'B' %}
+                            <span class="badge bg-info text-dark">B</span>
+                        {% elif grade.letter_grade == 'C' %}
+                            <span class="badge bg-primary">C</span>
+                        {% elif grade.letter_grade == 'D' %}
+                            <span class="badge bg-warning text-dark">D</span>
+                        {% else %}
+                            <span class="badge bg-danger">F</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center py-4 text-muted">No grades found matching your search.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

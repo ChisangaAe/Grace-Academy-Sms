@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Classroom Management - Grace Academy</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4 py-3 mb-4">
+        <a class="navbar-brand fw-bold" href="{% url 'dashboard' %}"><i class="fa-solid fa-graduation-cap me-2 text-primary"></i>Grace Academy</a>
+        <div class="navbar-nav ms-auto gap-2">
+            <a class="nav-link" href="{% url 'dashboard' %}">Dashboard</a>
+            <a class="nav-link" href="{% url 'student_list' %}">Students</a>
+            <a class="nav-link active fw-bold" href="{% url 'classroom_list' %}">Classrooms</a>
+            <a class="nav-link" href="{% url 'subject_list' %}">Subjects</a>
+            <a class="nav-link" href="{% url 'enter_marks' %}">Enter Marks</a>
+        </div>
+    </nav>
+
+    <div class="container mb-5">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="row g-4">
+            <!-- Add Classroom Form -->
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm p-4 bg-white">
+                    <h5 class="fw-bold mb-3"><i class="fa-solid fa-plus me-2 text-primary"></i>Add Classroom</h5>
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">Classroom Name</label>
+                            {{ form.name }}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">Capacity</label>
+                            {{ form.capacity }}
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100"><i class="fa-solid fa-save me-1"></i> Save Classroom</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Classroom List Table -->
+            <div class="col-md-8">
+                <div class="card border-0 shadow-sm p-4 bg-white">
+                    <h5 class="fw-bold mb-3"><i class="fa-solid fa-chalkboard me-2 text-primary"></i>Classroom Directory</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Class Name</th>
+                                    <th>Capacity</th>
+                                    <th>Enrolled Students</th>
+                                    <th>Subjects</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for room in classrooms %}
+                                <tr>
+                                    <td class="fw-bold">{{ room.name }}</td>
+                                    <td>{{ room.capacity }}</td>
+                                    <td><span class="badge bg-primary">{{ room.student_count }} Students</span></td>
+                                    <td><span class="badge bg-secondary">{{ room.subject_count }} Subjects</span></td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="4" class="text-center text-muted">No classrooms added yet.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

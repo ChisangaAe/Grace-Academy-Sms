@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block title %}Attendance | School System{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Attendance Records</h2>
+    <a href="{% url 'mark_attendance' %}" class="btn btn-primary">+ Mark Attendance</a>
+</div>
+
+<!-- SEARCH & FILTER BAR -->
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-2 align-items-center">
+            <div class="col-md-4">
+                <input type="text" name="q" class="form-control" placeholder="Search student name or admission..." value="{{ query }}">
+            </div>
+            <div class="col-md-3">
+                <input type="date" name="date" class="form-control" value="{{ selected_date }}">
+            </div>
+            <div class="col-md-3">
+                <select name="status" class="form-select">
+                    <option value="">All Statuses</option>
+                    {% for code, label in status_choices %}
+                        <option value="{{ code }}" {% if selected_status == code %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2 d-flex gap-2">
+                <button type="submit" class="btn btn-primary w-100">Search</button>
+                {% if query or selected_date or selected_status %}
+                    <a href="{% url 'attendance_list' %}" class="btn btn-outline-secondary">Reset</a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ATTENDANCE TABLE -->
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        <table class="table table-striped table-hover mb-0">
+            <thead class="table-dark">
+                <tr>
+                    <th>Date</th>
+                    <th>Student</th>
+                    <th>Class</th>
+                    <th>Status</th>
+                    <th>Remarks</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in attendances %}
+                <tr>
+                    <td>{{ record.date }}</td>
+                    <td>{{ record.student.first_name }} {{ record.student.last_name }}</td>
+                    <td>{{ record.student.classroom|default:"Not Assigned" }}</td>
+                    <td>
+                        {% if record.status == 'P' %}
+                            <span class="badge bg-success">Present</span>
+                        {% elif record.status == 'A' %}
+                            <span class="badge bg-danger">Absent</span>
+                        {% elif record.status == 'L' %}
+                            <span class="badge bg-warning text-dark">Late</span>
+                        {% else %}
+                            <span class="badge bg-secondary">Excused</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ record.remarks|default:"-" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center py-4 text-muted">No attendance records found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
