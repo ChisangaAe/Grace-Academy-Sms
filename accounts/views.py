@@ -14,8 +14,10 @@ from academics.models import Classroom, Subject
 # ==========================================
 
 def user_login(request):
-    """Handles authentication and checks approval status."""
+    """Handles authentication and routes users based on allocation status."""
     if request.user.is_authenticated:
+        if not request.user.is_allocated:
+            return redirect('pending_allocation')
         return redirect('dashboard')
 
     if request.method == 'POST':
@@ -25,18 +27,13 @@ def user_login(request):
         user = authenticate(request, username=username_input, password=password_input)
 
         if user is not None:
-            # Check if account has been approved by Principal, IT Tech, or Deputy
-            is_approved = getattr(user, 'is_approved', True)
-            
-            if not is_approved and not user.is_superuser:
-                messages.error(
-                    request,
-                    "Your account registration is pending approval by the Principal or IT Technician."
-                )
-                return render(request, 'accounts/login.html')
-
             login(request, user)
             messages.success(request, f"Welcome back, {user.get_full_name() or user.username}!")
+            
+            # Check allocation after login
+            if not user.is_allocated:
+                return redirect('pending_allocation')
+                
             return redirect('dashboard')
         else:
             messages.error(request, "Invalid username or password.")
@@ -54,6 +51,8 @@ def user_logout(request):
 def register_teacher(request):
     """Allows new teachers to submit registration requests."""
     if request.user.is_authenticated:
+        if not request.user.is_allocated:
+            return redirect('pending_allocation')
         return redirect('dashboard')
 
     if request.method == 'POST':
@@ -79,14 +78,21 @@ def register_teacher(request):
 def signup_view(request):
     """General User Signup view."""
     if request.user.is_authenticated:
+        if not request.user.is_allocated:
+            return redirect('pending_allocation')
         return redirect('dashboard')
 
     if request.method == 'POST':
         form = SignUpForm(request.POST)
-        if form.is_valid():  # Fixed: validation check before saving
+        if form.is_valid():
             user = form.save()
             login(request, user)
             messages.success(request, f"Account created successfully for {user.username}!")
+            
+            # Redirect to pending allocation if not fully set up
+            if not user.is_allocated:
+                return redirect('pending_allocation')
+                
             return redirect('dashboard')
     else:
         form = SignUpForm()
@@ -101,6 +107,10 @@ def signup_view(request):
 @login_required
 def dashboard(request):
     """Central Dashboard summarizing key school statistics & pending approvals."""
+    # Block unallocated teachers from accessing system dashboard
+    if not request.user.is_allocated:
+        return redirect('pending_allocation')
+
     total_students = Student.objects.count()
     total_classrooms = Classroom.objects.count()
     total_subjects = Subject.objects.count()
@@ -117,6 +127,16 @@ def dashboard(request):
         'pending_approvals': pending_approvals,
     }
     return render(request, 'accounts/dashboard.html', context)
+
+
+@login_required
+def pending_allocation_view(request):
+    """Holding page displayed to teachers awaiting admin approval or class/subject assignment."""
+    # Auto-redirect to dashboard if user gets allocated
+    if request.user.is_allocated:
+        return redirect('dashboard')
+
+    return render(request, 'accounts/pending_allocation.html')
 
 
 @login_required

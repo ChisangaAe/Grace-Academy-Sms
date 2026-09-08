@@ -5,6 +5,7 @@ from . import views
 urlpatterns = [
     # Dashboard & User Approvals
     path('dashboard/', views.dashboard, name='dashboard'),
+    path('pending-allocation/', views.pending_allocation_view, name='pending_allocation'),
     path('approve/<int:pk>/', views.approve_user, name='approve_user'),
     path('reject/<int:pk>/', views.reject_user, name='reject_user'),
 

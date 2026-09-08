@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Login - Grace Academy{% endblock %}
 
@@ -7,37 +8,43 @@
     <div class="col-md-4">
         <div class="card border-0 shadow-sm p-4 bg-white">
             <div class="text-center mb-4">
-                <i class="fa-solid fa-graduation-cap fa-3x text-primary mb-2"></i>
-                <h4 class="fw-bold text-dark">Grace Academy</h4>
-                <p class="text-muted small">Sign in to access your dashboard</p>
+                <img src="{% static 'images/logo.png' %}" alt="Grace Academy Logo" style="height: 60px; width: auto;" class="mb-2">
+                <h3 class="fw-bold">Grace Academy School</h3>
+                <p class="text-muted">Sign in to your account</p>
             </div>
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show py-2 small" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
 
             <form method="post">
                 {% csrf_token %}
-                {% if form.errors %}
-                    <div class="alert alert-danger py-2 small">Invalid username or password.</div>
-                {% endif %}
 
                 <div class="mb-3">
-                    <label class="form-label small fw-bold">Username</label>
-                    <input type="text" name="username" class="form-control" placeholder="Enter username" required autofocus>
+                    <label for="username" class="form-label fw-semibold">Username</label>
+                    <input type="text" name="username" id="username" class="form-control" placeholder="Enter username" required autofocus>
                 </div>
 
                 <div class="mb-3">
-                    <div class="d-flex justify-content-between">
-                        <label class="form-label small fw-bold">Password</label>
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <label for="password" class="form-label fw-semibold mb-0">Password</label>
                         <a href="{% url 'password_reset' %}" class="small text-decoration-none">Forgot password?</a>
                     </div>
-                    <input type="password" name="password" class="form-control" placeholder="Enter password" required>
+                    <input type="password" name="password" id="password" class="form-control" placeholder="Enter password" required>
                 </div>
 
-                <button type="submit" class="btn btn-primary w-100 py-2 fw-bold mb-3">
-                    <i class="fa-solid fa-right-to-bracket me-1"></i> Log In
-                </button>
+                <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold mt-2">Sign In</button>
             </form>
 
-            <div class="text-center border-top pt-3">
-                <p class="small text-muted mb-0">Don't have an account? <a href="{% url 'signup' %}" class="fw-bold text-decoration-none">Sign Up</a></p>
+            <div class="mt-4 text-center border-top pt-3">
+                <p class="small text-muted mb-1">Need an account?</p>
+                <a href="{% url 'register_teacher' %}" class="btn btn-outline-secondary btn-sm me-1">Teacher Registration</a>
+                <a href="{% url 'signup' %}" class="btn btn-outline-secondary btn-sm">General Signup</a>
             </div>
         </div>
     </div>

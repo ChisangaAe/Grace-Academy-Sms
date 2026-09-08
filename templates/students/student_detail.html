@@ -82,6 +82,9 @@
                     <a href="{% url 'generate_id_card' student.pk %}" class="btn btn-outline-primary px-3" target="_blank">
                         <i class="fa-solid fa-id-card me-1"></i> Print ID Card
                     </a>
+                    <a href="{% url 'generate_id_card' student.pk %}" class="btn btn-sm btn-outline-primary" target="_blank">
+                         <i class="fa-solid fa-id-card me-1"></i> Generate ID
+                    </a>
                     <a href="{% url 'student_report_card' student.pk %}" class="btn btn-outline-dark px-3" target="_blank">
                         <i class="fa-solid fa-file-pdf me-1"></i> Report Card
                     </a>

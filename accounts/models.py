@@ -51,7 +51,7 @@ class User(AbstractUser):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name='primary_class_users',  # Changed from 'class_teacher' to prevent clash
+        related_name='primary_class_users',
         help_text="Assigned Class (For ECE & Primary Teachers)"
     )
 
@@ -72,6 +72,26 @@ class User(AbstractUser):
     def is_admin_user(self):
         """Returns True if the user is an IT Tech, Principal, or Deputy Head."""
         return self.role in ['IT_TECH', 'PRINCIPAL', 'DEPUTY_PRIMARY', 'DEPUTY_SECONDARY'] or self.is_staff
+
+    @property
+    def is_allocated(self):
+        """
+        Returns True if an admin/superadmin OR if a teacher is approved and 
+        has their section and class/subjects assigned.
+        """
+        if self.is_admin_user:
+            return True
+
+        if not self.is_approved or not self.section:
+            return False
+
+        if self.section in ['ECE', 'PRIMARY']:
+            return self.primary_class is not None
+
+        if self.section == 'SECONDARY':
+            return self.secondary_subjects.exists()
+
+        return False
 
     def save(self, *args, **kwargs):
         """Automatically assign appropriate superuser/staff permissions based on role."""

@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container text-center py-5">
+    <div class="card shadow p-4 mx-auto" style="max-width: 520px;">
+        <div class="mb-3 text-warning">
+            <i class="bi bi-clock-history display-1"></i>
+        </div>
+        
+        <h3 class="fw-bold">Account Pending Allocation</h3>
+        
+        <p class="text-muted mt-3">
+            Welcome, <strong>{{ request.user.get_full_name|default:request.user.username }}</strong>!
+        </p>
+
+        {% if not request.user.is_approved %}
+            <p class="text-secondary">
+                Your account is currently <strong>awaiting administrator approval</strong>.
+            </p>
+        {% elif not request.user.section %}
+            <p class="text-secondary">
+                You have not yet been assigned to a <strong>School Section</strong> (ECE, Primary, or Secondary).
+            </p>
+        {% elif request.user.section == 'PRIMARY' or request.user.section == 'ECE' %}
+            <p class="text-secondary">
+                You are assigned to the <strong>{{ request.user.get_section_display }}</strong>, but an administrator has not allocated your <strong>Classroom</strong> yet.
+            </p>
+        {% elif request.user.section == 'SECONDARY' %}
+            <p class="text-secondary">
+                You are assigned to the <strong>Secondary Section</strong>, but an administrator has not allocated your <strong>Subjects</strong> yet.
+            </p>
+        {% endif %}
+
+        <p class="text-secondary small">
+            Please contact the school administrator or IT department to complete your account setup.
+        </p>
+
+        <div class="mt-4">
+            <a href="{% url 'logout' %}" class="btn btn-outline-danger">Log Out</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
