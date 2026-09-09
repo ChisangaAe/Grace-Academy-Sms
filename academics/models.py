@@ -1,31 +1,43 @@
 from django.db import models
-from django.contrib.auth import get_user_model
+from django.conf import settings
 from students.models import Student
 
-User = get_user_model()
+DAY_CHOICES = [
+    ('MONDAY', 'Monday'),
+    ('TUESDAY', 'Tuesday'),
+    ('WEDNESDAY', 'Wednesday'),
+    ('THURSDAY', 'Thursday'),
+    ('FRIDAY', 'Friday'),
+]
 
 
 class Classroom(models.Model):
+    LEVEL_CHOICES = [
+        ('PRIMARY', 'Primary'),
+        ('SECONDARY', 'Secondary'),
+    ]
     SECTION_CHOICES = [
         ('GRADE_5', 'Grade 5'),
         ('GRADE_6', 'Grade 6'),
-        ('SECONDARY', 'Secondary'),
+        ('PRIMARY', 'Primary Section'),
+        ('SECONDARY', 'Secondary Section'),
     ]
 
     name = models.CharField(max_length=50)
-    section = models.CharField(max_length=20, choices=SECTION_CHOICES, default='GRADE_5')
-    capacity = models.IntegerField(default=40)
+    level = models.CharField(max_length=10, choices=LEVEL_CHOICES, default='SECONDARY')
+    section = models.CharField(max_length=20, choices=SECTION_CHOICES, default='PRIMARY')
+    capacity = models.PositiveIntegerField(default=40)
     class_teacher = models.ForeignKey(
-        User, 
+        settings.AUTH_USER_MODEL, 
         on_delete=models.SET_NULL, 
         null=True, 
         blank=True, 
         related_name='managed_classrooms',
-        help_text="Assigned by Deputy Head"
+        help_text="Assigned class teacher"
     )
 
     def __str__(self):
-        return f"{self.name} ({self.get_section_display()})"
+        return f"{self.name} ({self.get_level_display()})"
 
 
 class Subject(models.Model):
@@ -39,7 +51,7 @@ class Subject(models.Model):
 
 class SubjectTeacherAssignment(models.Model):
     """Assigns specific subject teachers to a subject in a specific classroom."""
-    teacher = models.ForeignKey(User, on_delete=models.CASCADE, related_name='subject_assignments')
+    teacher = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='subject_assignments')
     classroom = models.ForeignKey(Classroom, on_delete=models.CASCADE, related_name='subject_assignments')
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name='teacher_assignments')
 
@@ -114,11 +126,32 @@ class BehaviorAssessment(models.Model):
     class_teacher_remark = models.TextField(blank=True, null=True, help_text="Class Teacher Remarks")
     head_teacher_remark = models.TextField(blank=True, null=True, help_text="Principal / Head Teacher Remarks")
     
-    evaluated_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
-    updated_at = models.DateTimeField(auto_auto_now=True) if hasattr(models.DateTimeField, 'auto_auto_now') else models.DateTimeField(auto_now=True)
+    evaluated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         unique_together = ('student', 'academic_term')
 
     def __str__(self):
         return f"Behavior: {self.student.get_full_name()} ({self.academic_term})"
+
+
+class TimetableSlot(models.Model):
+    classroom = models.ForeignKey(Classroom, on_delete=models.CASCADE, related_name='timetable_slots')
+    teacher = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='timetable_slots'
+    )
+    subject = models.ForeignKey(Subject, on_delete=models.CASCADE, null=True, blank=True)
+    day_of_week = models.CharField(max_length=10, choices=DAY_CHOICES, default='MONDAY')
+    start_time = models.TimeField()
+    end_time = models.TimeField()
+
+    class Meta:
+        ordering = ['day_of_week', 'start_time']
+
+    def __str__(self):
+        return f"{self.classroom.name} | {self.get_day_of_week_display()} ({self.start_time} - {self.end_time})"

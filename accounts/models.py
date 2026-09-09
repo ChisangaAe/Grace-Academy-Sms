@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
+
 class User(AbstractUser):
     # Role Levels
     ROLE_CHOICES = (
@@ -21,13 +22,13 @@ class User(AbstractUser):
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='TEACHER')
     section = models.CharField(max_length=20, choices=SECTION_CHOICES, blank=True, null=True)
     
-    # Approval status - Required before teachers can log in
+    # Approval status
     is_approved = models.BooleanField(
         default=False, 
         help_text="Requires approval before user can log in."
     )
 
-    # Custom related_name to eliminate reverse accessor clashes with auth.User
+    # Avoid reverse accessor conflicts with auth.User
     groups = models.ManyToManyField(
         'auth.Group',
         verbose_name='groups',
@@ -45,7 +46,7 @@ class User(AbstractUser):
         related_query_name="user",
     )
 
-    # 1. Primary & ECE Teacher Mapping: Mapped to a single classroom
+    # Primary & ECE Teacher Mapping: Mapped to a single classroom
     primary_class = models.ForeignKey(
         'academics.Classroom',
         on_delete=models.SET_NULL,
@@ -55,30 +56,27 @@ class User(AbstractUser):
         help_text="Assigned Class (For ECE & Primary Teachers)"
     )
 
-    # 2. Secondary Teacher Mapping: Mapped to 1 or 2 subjects
+    # Secondary Teacher Mapping: Mapped to subjects
     secondary_subjects = models.ManyToManyField(
         'academics.Subject',
         blank=True,
         related_name='subject_teachers',
-        help_text="Assigned Subjects (For Secondary Teachers - max 2 recommended)"
+        help_text="Assigned Subjects (For Secondary Teachers)"
     )
 
     @property
     def is_super_admin(self):
-        """Returns True if the user is an IT Technician, Principal, or Django Superuser."""
+        """Returns True if IT Technician, Principal, or Django Superuser."""
         return self.role in ['IT_TECH', 'PRINCIPAL'] or self.is_superuser
 
     @property
     def is_admin_user(self):
-        """Returns True if the user is an IT Tech, Principal, or Deputy Head."""
+        """Returns True if IT Tech, Principal, or Deputy Head."""
         return self.role in ['IT_TECH', 'PRINCIPAL', 'DEPUTY_PRIMARY', 'DEPUTY_SECONDARY'] or self.is_staff
 
     @property
     def is_allocated(self):
-        """
-        Returns True if an admin/superadmin OR if a teacher is approved and 
-        has their section and class/subjects assigned.
-        """
+        """Dynamic check if teacher has section and class/subjects assigned."""
         if self.is_admin_user:
             return True
 
@@ -94,7 +92,7 @@ class User(AbstractUser):
         return False
 
     def save(self, *args, **kwargs):
-        """Automatically assign appropriate superuser/staff permissions based on role."""
+        """Automatically assign staff/superuser rights based on role."""
         if self.role in ['IT_TECH', 'PRINCIPAL']:
             self.is_staff = True
             self.is_superuser = True

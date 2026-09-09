@@ -6,7 +6,8 @@ from django.contrib.auth import get_user_model
 from .models import Classroom, Subject, AcademicTerm, Mark, BehaviorAssessment, SubjectTeacherAssignment
 from .forms import ClassroomForm, SubjectForm, BehaviorAssessmentForm
 from students.models import Student
-
+from .models import TimetableSlot
+from django.views.decorators.http import require_POST
 User = get_user_model()
 
 
@@ -16,11 +17,36 @@ def is_deputy_or_admin(user):
 
 
 # --- CLASSROOM VIEWS ---
-
+def classroom_timetable(request, classroom_id):
+    """
+    Displays the timetable for a specific classroom.
+    """
+    classroom = get_object_or_404(Classroom, pk=classroom_id)
+    
+    context = {
+        'classroom': classroom,
+        # Add your timetable query here once your schedule model is connected
+    }
+    return render(request, 'academics/classroom_timetable.html', context)
 @login_required
 def classroom_list(request):
     classrooms = Classroom.objects.all()
     return render(request, 'academics/classroom_list.html', {'classrooms': classrooms})
+
+@require_POST
+def delete_timetable_slot(request, slot_id):
+    """
+    Deletes a specific timetable slot.
+    """
+    slot = get_object_or_404(TimetableSlot, pk=slot_id)
+    classroom_id = slot.classroom.id if hasattr(slot, 'classroom') and slot.classroom else None
+    
+    slot.delete()
+    messages.success(request, "Timetable slot deleted successfully.")
+    
+    if classroom_id:
+        return redirect('classroom_timetable', classroom_id=classroom_id)
+    return redirect('my_timetable')
 
 @login_required
 def classroom_create(request):
@@ -224,7 +250,18 @@ def enter_marks(request):
     }
     return render(request, 'academics/enter_marks.html', context)
 
-
+@login_required
+def my_timetable(request):
+    """
+    Displays the personal weekly schedule for the logged-in teacher.
+    """
+    # Adjust this query to match your timetable model field (e.g., teacher=request.user)
+    # timetables = Timetable.objects.filter(teacher=request.user)
+    
+    context = {
+        # 'timetables': timetables,
+    }
+    return render(request, 'academics/my_timetable.html', context)
 @login_required
 def enter_behavior(request):
     """Personal Behaviour & Character assessment, ONLY accessible by assigned Class Teacher or Deputy/Admin."""
