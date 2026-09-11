@@ -12,4 +12,5 @@ urlpatterns = [
     path('my-timetable/', views.my_timetable, name='my_timetable'),
     path('classrooms/<int:classroom_id>/timetable/', views.classroom_timetable, name='classroom_timetable'),
     path('timetable/delete/<int:slot_id>/', views.delete_timetable_slot, name='delete_timetable_slot'),
+    path('timetable/master/', views.master_timetable, name='master_timetable'),
 ]

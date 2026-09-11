@@ -7,6 +7,7 @@ from .models import Classroom, Subject, AcademicTerm, Mark, BehaviorAssessment, 
 from .forms import ClassroomForm, SubjectForm, BehaviorAssessmentForm
 from students.models import Student
 from .models import TimetableSlot
+from django.core.exceptions import PermissionDenied
 from django.views.decorators.http import require_POST
 User = get_user_model()
 
@@ -336,3 +337,26 @@ def enter_behavior(request):
         'is_class_teacher': is_class_teacher,
     }
     return render(request, 'academics/enter_behavior.html', context)
+
+@login_required
+def master_timetable(request):
+    if not request.user.is_admin_user:
+        raise PermissionDenied("Only administrators can view the master timetable.")
+
+    classrooms = Classroom.objects.all().prefetch_related('timetableslot_set')
+    selected_class_id = request.GET.get('classroom_id')
+    
+    if selected_class_id:
+        slots = TimetableSlot.objects.filter(classroom_id=selected_class_id).select_related('subject', 'teacher', 'classroom')
+    else:
+        slots = TimetableSlot.objects.all().select_related('subject', 'teacher', 'classroom')
+
+    days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
+
+    context = {
+        'classrooms': classrooms,
+        'selected_class_id': int(selected_class_id) if selected_class_id else None,
+        'slots': slots,
+        'days': days,
+    }
+    return render(request, 'academics/master_timetable.html', context)
