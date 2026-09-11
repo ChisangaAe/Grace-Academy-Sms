@@ -7,7 +7,7 @@ from .models import Classroom, Subject, AcademicTerm, Mark, BehaviorAssessment, 
 from .forms import ClassroomForm, SubjectForm, BehaviorAssessmentForm
 from students.models import Student
 from .models import TimetableSlot
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenieds
 from django.views.decorators.http import require_POST
 User = get_user_model()
 
@@ -198,6 +198,214 @@ def enter_marks(request):
                 subject=subject
             ).exists()
             if not is_assigned:
+                from decimal import Decimal, InvalidOperation
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.contrib.auth import get_user_model
+from django.core.exceptions import PermissionDenied
+from django.views.decorators.http import require_POST
+
+from .models import (
+    Classroom,
+    Subject,
+    AcademicTerm,
+    Mark,
+    BehaviorAssessment,
+    SubjectTeacherAssignment,
+    TimetableSlot,
+)
+from .forms import ClassroomForm, SubjectForm, BehaviorAssessmentForm
+from students.models import Student
+
+User = get_user_model()
+
+
+def is_deputy_or_admin(user):
+    """Helper to check if a user is a Deputy Head or Superuser."""
+    return user.is_superuser or user.groups.filter(name='Deputy Head').exists()
+
+
+# --- CLASSROOM VIEWS ---
+
+def classroom_timetable(request, classroom_id):
+    """Displays the timetable for a specific classroom."""
+    classroom = get_object_or_404(Classroom, pk=classroom_id)
+    
+    context = {
+        'classroom': classroom,
+    }
+    return render(request, 'academics/classroom_timetable.html', context)
+
+
+@login_required
+def classroom_list(request):
+    classrooms = Classroom.objects.all()
+    return render(request, 'academics/classroom_list.html', {'classrooms': classrooms})
+
+
+@require_POST
+def delete_timetable_slot(request, slot_id):
+    """Deletes a specific timetable slot."""
+    slot = get_object_or_404(TimetableSlot, pk=slot_id)
+    classroom_id = slot.classroom.id if hasattr(slot, 'classroom') and slot.classroom else None
+    
+    slot.delete()
+    messages.success(request, "Timetable slot deleted successfully.")
+    
+    if classroom_id:
+        return redirect('classroom_timetable', classroom_id=classroom_id)
+    return redirect('my_timetable')
+
+
+@login_required
+def classroom_create(request):
+    if request.method == 'POST':
+        form = ClassroomForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Classroom created successfully.")
+            return redirect('classroom_list')
+    else:
+        form = ClassroomForm()
+    return render(request, 'academics/classroom_form.html', {'form': form, 'title': 'Create Classroom'})
+
+
+# --- SUBJECT VIEWS ---
+
+@login_required
+def subject_list(request):
+    subjects = Subject.objects.all()
+    return render(request, 'academics/subject_list.html', {'subjects': subjects})
+
+
+@login_required
+def subject_create(request):
+    if request.method == 'POST':
+        form = SubjectForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Subject created successfully.")
+            return redirect('subject_list')
+    else:
+        form = SubjectForm()
+    return render(request, 'academics/subject_form.html', {'form': form, 'title': 'Create Subject'})
+
+
+# --- DEPUTY HEAD ASSIGNMENT VIEWS ---
+
+@login_required
+def assign_class_teacher(request):
+    """Deputy Head / Admin view to assign Class Teachers across Grade 5, 6, and Secondary."""
+    if not is_deputy_or_admin(request.user):
+        messages.error(request, "Access Denied: Only the Deputy Head or Admin can assign Class Teachers.")
+        return redirect('dashboard')
+
+    classrooms = Classroom.objects.all().order_by('section', 'name')
+    teachers = User.objects.filter(is_active=True)
+
+    if request.method == 'POST':
+        classroom_id = request.POST.get('classroom_id')
+        teacher_id = request.POST.get('teacher_id')
+
+        classroom = get_object_or_404(Classroom, pk=classroom_id)
+        teacher = User.objects.filter(pk=teacher_id).first() if teacher_id else None
+
+        classroom.class_teacher = teacher
+        classroom.save()
+
+        teacher_name = teacher.get_full_name() or teacher.username if teacher else "None"
+        messages.success(request, f"Assigned {teacher_name} as Class Teacher for {classroom.name}.")
+        return redirect('assign_class_teacher')
+
+    context = {
+        'classrooms': classrooms,
+        'teachers': teachers,
+    }
+    return render(request, 'academics/assign_class_teacher.html', context)
+
+
+@login_required
+def assign_subject_teacher(request):
+    """Deputy Head / Admin view to assign Subject Teachers to specific subjects and classrooms."""
+    if not is_deputy_or_admin(request.user):
+        messages.error(request, "Access Denied: Only the Deputy Head or Admin can assign Subject Teachers.")
+        return redirect('dashboard')
+
+    assignments = SubjectTeacherAssignment.objects.select_related('teacher', 'classroom', 'subject').all()
+    classrooms = Classroom.objects.all()
+    subjects = Subject.objects.all()
+    teachers = User.objects.filter(is_active=True)
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+
+        if action == 'assign':
+            teacher_id = request.POST.get('teacher_id')
+            classroom_id = request.POST.get('classroom_id')
+            subject_id = request.POST.get('subject_id')
+
+            teacher = get_object_or_404(User, pk=teacher_id)
+            classroom = get_object_or_404(Classroom, pk=classroom_id)
+            subject = get_object_or_404(Subject, pk=subject_id)
+
+            SubjectTeacherAssignment.objects.get_or_create(
+                teacher=teacher,
+                classroom=classroom,
+                subject=subject
+            )
+            messages.success(request, f"Assigned {teacher.get_full_name() or teacher.username} to teach {subject.name} in {classroom.name}.")
+
+        elif action == 'remove':
+            assignment_id = request.POST.get('assignment_id')
+            SubjectTeacherAssignment.objects.filter(pk=assignment_id).delete()
+            messages.success(request, "Subject teacher assignment removed.")
+
+        return redirect('assign_subject_teacher')
+
+    context = {
+        'assignments': assignments,
+        'classrooms': classrooms,
+        'subjects': subjects,
+        'teachers': teachers,
+    }
+    return render(request, 'academics/assign_subject_teacher.html', context)
+
+
+# --- MARKS & BEHAVIOR VIEWS ---
+
+@login_required
+def enter_marks(request):
+    """Subject teachers enter Test 1, Test 2, and Test 3 scores only for their assigned subjects/classes."""
+    user = request.user
+    terms = AcademicTerm.objects.all()
+
+    if is_deputy_or_admin(user):
+        classrooms = Classroom.objects.all()
+        subjects = Subject.objects.all()
+    else:
+        assigned_pairs = SubjectTeacherAssignment.objects.filter(teacher=user)
+        classrooms = Classroom.objects.filter(id__in=assigned_pairs.values_list('classroom_id', flat=True)).distinct()
+        subjects = Subject.objects.filter(id__in=assigned_pairs.values_list('subject_id', flat=True)).distinct()
+
+    selected_classroom_id = request.GET.get('classroom') or request.POST.get('classroom')
+    selected_subject_id = request.GET.get('subject') or request.POST.get('subject')
+    selected_term_id = request.GET.get('term') or request.POST.get('term')
+
+    mark_data = []
+
+    if selected_classroom_id and selected_subject_id and selected_term_id:
+        classroom = get_object_or_404(Classroom, pk=selected_classroom_id)
+        subject = get_object_or_404(Subject, pk=selected_subject_id)
+        term = get_object_or_404(AcademicTerm, pk=selected_term_id)
+
+        if not is_deputy_or_admin(user):
+            is_assigned = SubjectTeacherAssignment.objects.filter(
+                teacher=user,
+                classroom=classroom,
+                subject=subject
+            ).exists()
+            if not is_assigned:
                 messages.error(request, f"Access Restricted: You are not assigned to teach {subject.name} in {classroom.name}.")
                 return redirect('enter_marks')
 
@@ -228,7 +436,7 @@ def enter_marks(request):
                 mark_obj.test1 = t1
                 mark_obj.test2 = t2
                 mark_obj.test3 = t3
-                mark_obj.save()  # Triggers average calculation in Mark.save()
+                mark_obj.save()
 
             messages.success(request, f"Marks updated successfully for {subject.name} - {classroom.name}.")
             return redirect(f"{request.path}?classroom={selected_classroom_id}&subject={selected_subject_id}&term={selected_term_id}")
@@ -251,18 +459,14 @@ def enter_marks(request):
     }
     return render(request, 'academics/enter_marks.html', context)
 
+
 @login_required
 def my_timetable(request):
-    """
-    Displays the personal weekly schedule for the logged-in teacher.
-    """
-    # Adjust this query to match your timetable model field (e.g., teacher=request.user)
-    # timetables = Timetable.objects.filter(teacher=request.user)
-    
-    context = {
-        # 'timetables': timetables,
-    }
+    """Displays the personal weekly schedule for the logged-in teacher."""
+    context = {}
     return render(request, 'academics/my_timetable.html', context)
+
+
 @login_required
 def enter_behavior(request):
     """Personal Behaviour & Character assessment, ONLY accessible by assigned Class Teacher or Deputy/Admin."""
@@ -279,7 +483,6 @@ def enter_behavior(request):
         classroom = get_object_or_404(Classroom, pk=selected_classroom_id)
         term = get_object_or_404(AcademicTerm, pk=selected_term_id)
 
-        # Permission check: Class Teacher, Deputy Head, or Admin
         if request.user == classroom.class_teacher or is_deputy_or_admin(request.user):
             is_class_teacher = True
         else:
@@ -296,7 +499,6 @@ def enter_behavior(request):
                     defaults={'classroom': classroom}
                 )
 
-                # Save all 11 character items matching the report card layout
                 assessment.obedience = request.POST.get(f"obedience_{student.id}", 'GOOD')
                 assessment.self_control = request.POST.get(f"self_control_{student.id}", 'GOOD')
                 assessment.sports = request.POST.get(f"sports_{student.id}", 'GOOD')
@@ -338,12 +540,16 @@ def enter_behavior(request):
     }
     return render(request, 'academics/enter_behavior.html', context)
 
+
+# --- TIMETABLE VIEWS ---
+
 @login_required
 def master_timetable(request):
+    """Master Timetable View for Administrators."""
     if not request.user.is_admin_user:
         raise PermissionDenied("Only administrators can view the master timetable.")
 
-    classrooms = Classroom.objects.all().prefetch_related('timetableslot_set')
+    classrooms = Classroom.objects.all()
     selected_class_id = request.GET.get('classroom_id')
     
     if selected_class_id:
@@ -355,7 +561,7 @@ def master_timetable(request):
 
     context = {
         'classrooms': classrooms,
-        'selected_class_id': int(selected_class_id) if selected_class_id else None,
+        'selected_class_id': int(selected_class_id) if selected_class_id and str(selected_class_id).isdigit() else None,
         'slots': slots,
         'days': days,
     }
