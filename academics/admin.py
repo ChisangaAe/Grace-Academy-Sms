@@ -1,5 +1,13 @@
 from django.contrib import admin
-from .models import AcademicTerm, Classroom, Subject, Mark, BehaviorAssessment
+from .models import (
+    Classroom,
+    Subject,
+    SubjectTeacherAssignment,
+    AcademicTerm,
+    Mark,
+    BehaviorAssessment,
+    TimetableSlot,
+)
 
 
 @admin.register(AcademicTerm)
@@ -33,3 +41,10 @@ class MarkAdmin(admin.ModelAdmin):
 class BehaviorAssessmentAdmin(admin.ModelAdmin):
     list_display = ('student', 'classroom', 'academic_term', 'evaluated_by', 'updated_at')
     list_filter = ('academic_term', 'classroom')
+
+
+@admin.register(TimetableSlot)
+class TimetableSlotAdmin(admin.ModelAdmin):
+    list_display = ('classroom', 'day_of_week', 'subject', 'teacher', 'start_time', 'end_time')
+    list_filter = ('day_of_week', 'classroom', 'teacher')
+    search_fields = ('classroom__name', 'subject__name', 'teacher__username', 'teacher__first_name')
