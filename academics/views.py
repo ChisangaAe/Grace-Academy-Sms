@@ -1,4 +1,5 @@
 from decimal import Decimal, InvalidOperation
+from django.core.exceptions import PermissionDenied
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -7,7 +8,6 @@ from .models import Classroom, Subject, AcademicTerm, Mark, BehaviorAssessment, 
 from .forms import ClassroomForm, SubjectForm, BehaviorAssessmentForm
 from students.models import Student
 from .models import TimetableSlot
-from django.core.exceptions import PermissionDenieds
 from django.views.decorators.http import require_POST
 User = get_user_model()
 
