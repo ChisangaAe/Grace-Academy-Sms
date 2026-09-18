@@ -11,87 +11,90 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     {% block extra_head %}{% endblock %}
 </head>
 <body class="bg-light">
 
     <!-- Global Navigation Bar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4 py-3 mb-4 shadow-sm sticky-top">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-3 py-2 mb-4 shadow-sm sticky-top">
         <div class="container-fluid">
-            <a class="navbar-brand fw-bold me-4 d-flex align-items-center" href="{% url 'dashboard' %}">
-                <!-- SCHOOL LOGO -->
-                <img src="{% static 'images/logo.png' %}" alt="Grace Academy Logo" class="me-2" style="height: 35px; width: auto; object-fit: contain;">
+            <!-- School Logo & Brand -->
+            <a class="navbar-brand fw-bold me-4 d-inline-flex align-items-center gap-2" href="{% url 'dashboard' %}">
+                <img src="{% static 'images/logo.png' %}" alt="Grace Academy Logo" style="height: 32px; width: auto; object-fit: contain;">
                 <span>Grace Academy</span>
             </a>
             
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
                 <span class="navbar-toggler-icon"></span>
             </button>
 
             <div class="collapse navbar-collapse" id="mainNavbar">
                 <!-- Left Main Links -->
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0 gap-1">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0 align-items-lg-center gap-lg-1">
                     <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active fw-bold{% endif %}" href="{% url 'dashboard' %}">
-                            <i class="fa-solid fa-chart-line me-1"></i> Dashboard
+                        <a class="nav-link d-inline-flex align-items-center gap-2 text-nowrap {% if request.resolver_match.url_name == 'dashboard' %}active fw-bold{% endif %}" href="{% url 'dashboard' %}">
+                            <i class="fa-solid fa-chart-line"></i> <span>Dashboard</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if 'student' in request.resolver_match.url_name and request.resolver_match.url_name != 'bulk_promote' %}active fw-bold{% endif %}" href="{% url 'student_list' %}">
-                            <i class="fa-solid fa-users me-1"></i> Students
+                        <a class="nav-link d-inline-flex align-items-center gap-2 text-nowrap {% if 'student' in request.resolver_match.url_name and request.resolver_match.url_name != 'bulk_promote' %}active fw-bold{% endif %}" href="{% url 'student_list' %}">
+                            <i class="fa-solid fa-users"></i> <span>Students</span>
                         </a>
                     </li>
 
                     <!-- Academics Dropdown Menu -->
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle {% if request.resolver_match.url_name in 'classroom_list,subject_list,enter_marks' %}active fw-bold{% endif %}" href="#" id="academicsDropdown" role="button" data-bs-toggle="dropdown">
-                            <i class="fa-solid fa-book-open me-1"></i> Academics
+                        <a class="nav-link dropdown-toggle d-inline-flex align-items-center gap-2 text-nowrap {% if request.resolver_match.url_name in 'classroom_list,subject_list,enter_marks' %}active fw-bold{% endif %}" href="#" id="academicsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fa-solid fa-book-open"></i> <span>Academics</span>
                         </a>
-                        <ul class="dropdown-menu">
+                        <ul class="dropdown-menu dropdown-menu-dark shadow" aria-labelledby="academicsDropdown">
                             <li>
-                                <a class="dropdown-item" href="{% url 'classroom_list' %}">
-                                    <i class="fa-solid fa-chalkboard me-2 text-primary"></i> Classrooms
+                                <a class="dropdown-item d-flex align-items-center gap-2" href="{% url 'classroom_list' %}">
+                                    <i class="fa-solid fa-chalkboard text-primary"></i> Classrooms
                                 </a>
                             </li>
                             <li>
-                                <a class="dropdown-item" href="{% url 'subject_list' %}">
-                                    <i class="fa-solid fa-book me-2 text-success"></i> Subjects
+                                <a class="dropdown-item d-flex align-items-center gap-2" href="{% url 'subject_list' %}">
+                                    <i class="fa-solid fa-book text-success"></i> Subjects
                                 </a>
                             </li>
                             <li><hr class="dropdown-divider"></li>
-                            <!-- Show Master Timetable to Admins and Super Admins -->
-    {% if user.is_admin_user %}
-    <li>
-        <a class="dropdown-item" href="{% url 'master_timetable' %}">
-            <i class="bi bi-calendar3"></i> Master Timetable
-        </a>
-    </li>
-    {% endif %}
+                            {% if user.is_admin_user %}
                             <li>
-                                <a class="dropdown-item" href="{% url 'my_timetable' %}"><i class="bi bi-calendar-week me-2"></i> My Timetable</a>
+                                <a class="dropdown-item d-flex align-items-center gap-2" href="{% url 'master_timetable' %}">
+                                    <i class="bi bi-calendar3 text-info"></i> Master Timetable
+                                </a>
+                            </li>
+                            {% endif %}
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center gap-2" href="{% url 'my_timetable' %}">
+                                    <i class="bi bi-calendar-week text-warning"></i> My Timetable
+                                </a>
                             </li>
                             <li>
-                                <a class="dropdown-item" href="{% url 'enter_marks' %}">
-                                    <i class="fa-solid fa-pen-to-square me-2 text-warning"></i> Enter Marks
+                                <a class="dropdown-item d-flex align-items-center gap-2" href="{% url 'enter_marks' %}">
+                                    <i class="fa-solid fa-pen-to-square text-warning"></i> Enter Marks
                                 </a>
                             </li>
                         </ul>
                     </li>
 
-                    <!-- Tools Dropdown Menu -->
+                    <!-- Management Dropdown Menu -->
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle {% if request.resolver_match.url_name == 'bulk_promote' %}active fw-bold{% endif %}" href="#" id="toolsDropdown" role="button" data-bs-toggle="dropdown">
-                            <i class="fa-solid fa-gears me-1"></i> Management
+                        <a class="nav-link dropdown-toggle d-inline-flex align-items-center gap-2 text-nowrap {% if request.resolver_match.url_name == 'bulk_promote' %}active fw-bold{% endif %}" href="#" id="toolsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fa-solid fa-gears"></i> <span>Management</span>
                         </a>
-                        <ul class="dropdown-menu">
+                        <ul class="dropdown-menu dropdown-menu-dark shadow" aria-labelledby="toolsDropdown">
                             <li>
-                                <a class="dropdown-item" href="{% url 'bulk_promote' %}">
-                                    <i class="fa-solid fa-angles-up me-2 text-info"></i> Bulk Class Promotion
+                                <a class="dropdown-item d-flex align-items-center gap-2" href="{% url 'bulk_promote' %}">
+                                    <i class="fa-solid fa-angles-up text-info"></i> Bulk Class Promotion
                                 </a>
                             </li>
                             <li>
-                                <a class="dropdown-item" href="{% url 'export_students_csv' %}">
-                                    <i class="fa-solid fa-file-csv me-2 text-secondary"></i> Export Student CSV
+                                <a class="dropdown-item d-flex align-items-center gap-2" href="{% url 'export_students_csv' %}">
+                                    <i class="fa-solid fa-file-csv text-secondary"></i> Export Student CSV
                                 </a>
                             </li>
                         </ul>
@@ -99,18 +102,18 @@
                 </ul>
 
                 <!-- Right User Profile & Authentication Controls -->
-                <div class="d-flex align-items-center gap-3">
+                <div class="d-flex align-items-center gap-3 mt-3 mt-lg-0 text-nowrap">
                     {% if user.is_authenticated %}
-                        <a href="{% url 'student_create' %}" class="btn btn-primary btn-sm px-3">
-                            <i class="fa-solid fa-user-plus me-1"></i> Register Student
+                        <a href="{% url 'student_create' %}" class="btn btn-primary btn-sm px-3 py-1.5 d-inline-flex align-items-center gap-2 fw-medium shadow-sm">
+                            <i class="fa-solid fa-user-plus"></i> Register Student
                         </a>
 
-                        <div class="text-white me-1">
-                            <span class="text-white-50 small me-1">Logged in as:</span>
-                            <strong class="me-1">{{ user.get_full_name|default:user.username }}</strong>
+                        <div class="d-flex align-items-center gap-2 text-white border-start border-secondary border-opacity-50 ps-3">
+                            <span class="text-white-50 small">Logged in as:</span>
+                            <strong class="text-white">{{ user.get_full_name|default:user.username }}</strong>
                             
                             <!-- User Role Badge -->
-                            <span class="badge bg-light text-dark">
+                            <span class="badge bg-light text-dark fw-bold">
                                 {% if user.is_superuser %}
                                     Superadmin
                                 {% elif user.role %}
@@ -121,15 +124,15 @@
                             </span>
                         </div>
 
-                        <a href="{% url 'logout' %}" class="btn btn-outline-light btn-sm px-3 ms-2">
-                            <i class="fa-solid fa-right-from-bracket me-1"></i> Logout
+                        <a href="{% url 'logout' %}" class="btn btn-outline-light btn-sm px-3 py-1.5 d-inline-flex align-items-center gap-2">
+                            <i class="fa-solid fa-right-from-bracket"></i> Logout
                         </a>
                     {% else %}
-                        <a href="{% url 'login' %}" class="btn btn-outline-light btn-sm px-3">
-                            <i class="fa-solid fa-right-to-bracket me-1"></i> Log In
+                        <a href="{% url 'login' %}" class="btn btn-outline-light btn-sm px-3 py-1.5 d-inline-flex align-items-center gap-2">
+                            <i class="fa-solid fa-right-to-bracket"></i> Log In
                         </a>
-                        <a href="{% url 'signup' %}" class="btn btn-primary btn-sm px-3">
-                            <i class="fa-solid fa-user-plus me-1"></i> Sign Up
+                        <a href="{% url 'signup' %}" class="btn btn-primary btn-sm px-3 py-1.5 d-inline-flex align-items-center gap-2 fw-medium">
+                            <i class="fa-solid fa-user-plus"></i> Sign Up
                         </a>
                     {% endif %}
                 </div>
