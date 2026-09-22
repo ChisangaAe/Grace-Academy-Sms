@@ -109,7 +109,7 @@
 </head>
 <body>
 
-    <!-- Dark Navy Sidebar (School Management System) -->
+    <!-- Dark Navy Sidebar -->
     <aside class="sidebar">
         <div>
             <div class="sidebar-brand d-flex align-items-center gap-2">
@@ -123,36 +123,36 @@
             </div>
 
             <div class="sidebar-nav">
-                <a href="{% url 'dashboard' %}" class="sidebar-link active">
+                <a href="{% url 'dashboard' %}" class="sidebar-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
                     <i class="fa-solid fa-chart-pie"></i> Dashboard
                 </a>
-                <a href="{% url 'student_list' %}" class="sidebar-link">
+                <a href="{% url 'student_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'student_list' %}active{% endif %}">
                     <i class="fa-solid fa-user-graduate"></i> Students
                 </a>
-                <a href="#" class="sidebar-link">
+                <a href="{% url 'teacher_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'teacher_list' %}active{% endif %}">
                     <i class="fa-solid fa-chalkboard-user"></i> Teachers & Staff
                 </a>
-                <a href="#" class="sidebar-link">
+                <a href="{% url 'classroom_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'classroom_list' %}active{% endif %}">
                     <i class="fa-solid fa-school"></i> Classrooms
                 </a>
-                <a href="#" class="sidebar-link">
+                <a href="{% url 'attendance_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'attendance_list' %}active{% endif %}">
                     <i class="fa-solid fa-clipboard-user"></i> Attendance
                 </a>
-                <a href="#" class="sidebar-link">
+                <a href="{% url 'examination_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'examination_list' %}active{% endif %}">
                     <i class="fa-solid fa-book-bookmark"></i> Examination & Marks
                 </a>
-                <a href="#" class="sidebar-link">
+                <a href="{% url 'finance_dashboard' %}" class="sidebar-link {% if request.resolver_match.url_name == 'finance_dashboard' %}active{% endif %}">
                     <i class="fa-solid fa-file-invoice-dollar"></i> Finance & Fees
                 </a>
-                <a href="#" class="sidebar-link">
+                <a href="{% url 'system_settings' %}" class="sidebar-link {% if request.resolver_match.url_name == 'system_settings' %}active{% endif %}">
                     <i class="fa-solid fa-gear"></i> System Settings
                 </a>
 
                 <div class="sidebar-heading"><i class="fa-solid fa-bolt me-1"></i> Quick Tasks</div>
-                <a href="{% url 'student_create' %}" class="sidebar-link">
+                <a href="{% url 'student_create' %}" class="sidebar-link {% if request.resolver_match.url_name == 'student_create' %}active{% endif %}">
                     <i class="fa-solid fa-plus me-1"></i> New Student
                 </a>
-                <a href="#" class="sidebar-link">
+                <a href="{% url 'promote_class' %}" class="sidebar-link {% if request.resolver_match.url_name == 'promote_class' %}active{% endif %}">
                     <i class="fa-solid fa-angles-up me-1"></i> Promote Class
                 </a>
                 <a href="{% url 'export_students_csv' %}" class="sidebar-link">

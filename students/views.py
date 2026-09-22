@@ -6,7 +6,7 @@ from django.contrib import messages
 from django.http import HttpResponse
 from .models import Student
 from academics.models import Mark, BehaviorAssessment, AcademicTerm, Classroom, Subject
-
+from django.shortcuts import render
 
 def calculate_grade_and_remark(score):
     """Calculates grade number and remark based on performance score."""
@@ -157,3 +157,23 @@ def bulk_assign_classroom(request):
 def bulk_promote(request):
     """Bulk promote students to next grade."""
     return render(request, 'students/bulk_promote.html')
+def teacher_list(request):
+    return render(request, 'placeholder.html', {'module_name': 'Teachers & Staff'})
+
+def classroom_list(request):
+    return render(request, 'placeholder.html', {'module_name': 'Classrooms'})
+
+def attendance_list(request):
+    return render(request, 'placeholder.html', {'module_name': 'Attendance'})
+
+def examination_list(request):
+    return render(request, 'placeholder.html', {'module_name': 'Examination & Marks'})
+
+def finance_dashboard(request):
+    return render(request, 'placeholder.html', {'module_name': 'Finance & Fees'})
+
+def system_settings(request):
+    return render(request, 'placeholder.html', {'module_name': 'System Settings'})
+
+def promote_class(request):
+    return render(request, 'placeholder.html', {'module_name': 'Promote Class'})
